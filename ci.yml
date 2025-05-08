@@ -1,0 +1,50 @@
+name: Yii2 Advanced CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD:
+          MYSQL_DATABASE: yii2advanced_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, gd, pdo_mysql, zip
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Prepare environment
+        run: |
+          cp .github/.env.test .env
+          php init --env=Test --overwrite=All
+          mkdir -p backend/runtime/logs
+          mkdir -p frontend/runtime/logs
+          mkdir -p console/runtime/logs
+          chmod -R 777 backend/runtime
+          chmod -R 777 frontend/runtime
+          chmod -R 777 console/runtime
+
+      - name: Run migrations
+        run: php yii migrate --interactive=0
+
+      - name: Run unit tests
+        run: vendor/bin/codecept run unit
