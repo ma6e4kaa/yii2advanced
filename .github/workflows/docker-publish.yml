@@ -71,4 +71,4 @@ jobs:
       - name: Run Codeception tests
         run: |
           vendor/bin/codecept build
-          vendor/bin/codecept run unit
+          vendor/bin/codecept run
