@@ -14,11 +14,10 @@ jobs:
       mysql:
         image: mysql:5.7
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: 1
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_DATABASE: yii2advanced_test
-        ports: ["3306:3306"]
-        # Проверка доступности MySQL перед запуском тестов
-        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+        ports: [ 3306:3306 ]
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       - name: Checkout repository
@@ -47,10 +46,15 @@ jobs:
           mkdir -p backend/runtime frontend/runtime console/runtime
           chmod -R 777 backend/runtime frontend/runtime console/runtime
 
-      - name: Configure database
+      - name: Wait for MySQL to be ready
         run: |
+          for i in {1..10}; do
+            mysql -h 127.0.0.1 -u root -e "SELECT 1" && break || sleep 5
+          done
           mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS yii2advanced_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
-          php yii migrate --interactive=0
+
+      - name: Run migrations
+        run: php yii migrate --interactive=0
 
       - name: Run Codeception tests
         run: |
