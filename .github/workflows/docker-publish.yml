@@ -66,7 +66,7 @@ jobs:
         run: php -r "new PDO('mysql:host=127.0.0.1;dbname=yii2advanced_test', 'root', ''); echo 'Connection successful!';"
 
       - name: Run migrations
-        run: php yii migrate --interactive=0
+        run: php yii_test migrate --interactive=0
 
       - name: Run Codeception tests
         run: |
