@@ -42,7 +42,7 @@ jobs:
       - name: Prepare environment
         run: |
           cp .github/.env.test .env
-          php init --env=Development --overwrite=All
+          php init --env=Development --overwrite=None
           mkdir -p backend/runtime frontend/runtime console/runtime
           chmod -R 777 backend/runtime frontend/runtime console/runtime
 
