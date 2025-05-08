@@ -1,0 +1,58 @@
+name: Yii2 Advanced CI
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 1
+          MYSQL_DATABASE: yii2advanced_test
+        ports: ["3306:3306"]
+        # Проверка доступности MySQL перед запуском тестов
+        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, gd, pdo_mysql, zip
+          coverage: none
+
+      - name: Cache Composer packages
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('composer.lock') }}
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress --ignore-platform-reqs
+
+      - name: Prepare environment
+        run: |
+          cp .github/.env.test .env
+          php init --env=Test --overwrite=All
+          mkdir -p backend/runtime frontend/runtime console/runtime
+          chmod -R 777 backend/runtime frontend/runtime console/runtime
+
+      - name: Configure database
+        run: |
+          mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS yii2advanced_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+          php yii migrate --interactive=0
+
+      - name: Run Codeception tests
+        run: |
+          vendor/bin/codecept build
+          vendor/bin/codecept run
