@@ -48,22 +48,8 @@ jobs:
 
       - name: Configure database connection
         run: |
-          # Используем localhost для подключения к MySQL
-          sed -i 's/DB_DSN=.*/DB_DSN=mysql:host=127.0.0.1;port=3306;dbname=yii2advanced_test/' .env
-          sed -i 's/DB_USER=.*/DB_USER=root/' .env
-          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=/' .env
-
-          # Ждем готовности MySQL
-          for i in {1..30}; do
-            mysql -h 127.0.0.1 -u root -e "SELECT 1" && break || sleep 2
-            echo "Waiting for MySQL... Attempt $i"
-          done
-          
           # Создаем базу данных
           mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS yii2advanced_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
-
-      - name: Verify database connection
-        run: php -r "new PDO('mysql:host=127.0.0.1;dbname=yii2advanced_test', 'root', ''); echo 'Connection successful!';"
 
       - name: Run migrations
         run: php yii_test migrate --interactive=0
