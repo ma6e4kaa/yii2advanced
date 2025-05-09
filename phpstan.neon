@@ -1,0 +1,10 @@
+parameters:
+  level: 5
+  paths:
+    - common
+    - frontend
+    - backend
+  excludePaths:
+    - */runtime/*
+    - */vendor/*
+    - */migrations/*

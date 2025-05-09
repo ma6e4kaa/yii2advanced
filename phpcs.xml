@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<ruleset name="Yii2 Advanced">
+    <rule ref="PSR12"/>
+    <file>common</file>
+    <file>frontend</file>
+    <file>backend</file>
+    <exclude-pattern>*/runtime/*</exclude-pattern>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <arg name="extensions" value="php"/>
+    <arg name="colors"/>
+</ruleset>
